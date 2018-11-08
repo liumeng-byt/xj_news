@@ -1,4 +1,5 @@
 import logging
+from info import models
 from flask_script import Manager
 from  flask_migrate import Migrate, MigrateCommand
 # from info.__init__ import app,db
