@@ -1,3 +1,4 @@
+import logging
 from redis import StrictRedis
 import base64, os
 
@@ -8,6 +9,8 @@ class Config(object):
     # 数据库的配置信息
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/information"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # LOG_LEVEL=logging.ERROR
+    # LOG_LEVEL = logging.DEBUG
 
     # redis配置
     REDIS_HOST = "127.0.0.1"
@@ -26,7 +29,10 @@ class Config(object):
 
 class DevelopementConfig(Config):
     """开发模式下的配置"""
+    # LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.INFO
     DEBUG = True
+
 
 class ProductionConfig(Config):
     """生产模式下的配置"""
