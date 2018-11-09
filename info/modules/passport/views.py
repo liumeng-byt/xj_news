@@ -10,5 +10,4 @@ def image_code():
     #把图片返回给浏览器
     response = make_response(image)
     response.headers["Content-Type"] = "image/jpeg"
-
     return response
