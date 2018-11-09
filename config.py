@@ -18,9 +18,8 @@ class Config(object):
     REDIS_SESSION_DB = 1
     REDIS_DATA_DB = 0
 
-    SECRECT_KEY = base64.b64encode(os.urandom(48))  # 设置密钥
-    # print(SECRECT_KEY)
-    # flask_session 的配置信息
+    SECRET_KEY = base64.b64encode(os.urandom(48))  # 设置密钥
+    # SECRET_KEY = "idsfhu8732g*&F^(%$#"
     SESSION_TYPE = "redis"  # 指定 session 保存到 redis 中
     SESSION_USE_SIGNER = True  # 让 cookie 中的 session_id 被加密签名处理
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_SESSION_DB)  # 使用 redis 的实例

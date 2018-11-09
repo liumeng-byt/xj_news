@@ -8,10 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_session import Session
 
-#创建保存redis操作对象的全局变量
-redis=None
-#创建mysql操作对象的变量
-db=SQLAlchemy()
+# 创建保存redis操作对象的全局变量
+redis = None
+# 创建mysql操作对象的变量
+db = SQLAlchemy()
+
 
 def setup_log(log_level):
     """配置日志"""
@@ -29,14 +30,13 @@ def setup_log(log_level):
     logging.getLogger().addHandler(file_log_handler)
 
 
-
 def create_app(config_name):
     """初始化函数"""
     # flask 实例对象的初始化
     app = Flask(__name__)
 
-    #根据配置文件中的字典查找对应的配置类
-    Config=config[config_name]
+    # 根据配置文件中的字典查找对应的配置类
+    Config = config[config_name]
 
     # 加载配置类到flask项目中
     app.config.from_object(Config)
@@ -44,27 +44,29 @@ def create_app(config_name):
     # 加载配置信息到SQLAlchemy
     # global db
     # db = SQLAlchemy(app)
-    db.init_app(app)
+    db.init_app(app)  # 关联db和app
 
     # 实例化redis操作对象
     global redis
     redis_store = StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DATA_DB)
 
-    # 开启csrf的防范机制
+    # 开启csrf的防范机制,csrf保护关联app
     CSRFProtect(app)
 
-    # 开启session,并加载session配置
+    # 开启session,把Session对象和app关联
     Session(app)
 
     # 启动日志功能
     setup_log(Config.LOG_LEVEL)
 
-    # 注册蓝图
+    # 把视图函数的蓝图注册到app
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
-    #验证蓝图（短信）
+    # 把验证蓝图（短信）注册到app
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
 
     return app
+
+# app=create_app("development") manage.py里 app接收的是上面的 return app

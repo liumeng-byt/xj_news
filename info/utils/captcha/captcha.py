@@ -208,6 +208,9 @@ class Captcha(object):
         name = "".join(random.sample(string.ascii_lowercase + string.ascii_uppercase + '3456789', 24))
         text = "".join(self._text)
         out = BytesIO()
+        # print(name)
+        # print(text)
+        # print(image)
         image.save(out, format=fmt)
         if path:
             image.save(os.path.join(path, name), fmt)
