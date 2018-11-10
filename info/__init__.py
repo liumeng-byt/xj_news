@@ -9,7 +9,7 @@ from flask_wtf import CSRFProtect
 from flask_session import Session
 
 # 创建保存redis操作对象的全局变量
-redis = None
+redis_store = None
 # 创建mysql操作对象的变量
 db = SQLAlchemy()
 
@@ -47,7 +47,7 @@ def create_app(config_name):
     db.init_app(app)  # 关联db和app
 
     # 实例化redis操作对象
-    global redis
+    global redis_store
     redis_store = StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DATA_DB)
 
     # 开启csrf的防范机制,csrf保护关联app
