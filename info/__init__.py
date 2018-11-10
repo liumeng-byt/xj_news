@@ -32,7 +32,7 @@ def setup_log(log_level):
 
 def create_app(config_name):
     """初始化函数"""
-    # flask 实例对象的初始化
+    # flask 实例对象的初始化,import_name指的是 __name__ 就是程序所在的包（模块）
     app = Flask(__name__)
 
     # 根据配置文件中的字典查找对应的配置类
