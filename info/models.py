@@ -71,6 +71,7 @@ class User(BaseModel, db.Model):
         self.password_hash = generate_password_hash(value)
 
     def check_passowrd(self, password):
+        # 检验密码是否正确，正确为true
         return check_password_hash(self.password_hash, password)
 
 

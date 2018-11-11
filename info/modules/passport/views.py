@@ -1,5 +1,7 @@
+
 import random
 import re
+from datetime import datetime
 
 from flask import current_app, jsonify
 from flask import request
@@ -94,13 +96,13 @@ def sms_code():
         # 5. 生成随机的短信验证码
     sms_code = "%06d" % random.randint(0, 999999)
 
-    ccp = CCP()
-    ret = ccp.send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60],
-                                constants.SMS_CODE_TEMPLATE_ID)
-
-    if ret == -1:
-        # 发送短信失败
-        return jsonify(errno=RET.THIRDERR, errmsg="发送短信失败")
+    # ccp = CCP()
+    # ret = ccp.send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60],
+    #                             constants.SMS_CODE_TEMPLATE_ID)
+    #
+    # if ret == -1:
+    #     # 发送短信失败
+    #     return jsonify(errno=RET.THIRDERR, errmsg="发送短信失败")
 
     # 7. 把短信验证吗保存redis中，再后面用户提交表单的时候，要验证短信验证码是否正确
     try:
@@ -114,64 +116,106 @@ def sms_code():
     return jsonify(errno=RET.OK, errmsg="发送成功")
 
 
-# @passport_blu.route("/register",methods=["POST"])
-# def register():
-#     """注册信息"""
-#     # 获取参数和判断是否有值
-#     json_data = request.json
-#     mobile = json_data.get("mobile")
-#     sms_code = json_data.get("smscode")
-#     password = json_data.get("password")
-#
-#     # 验证用户提交的数据
-#     if not all([mobile,sms_code,password]):
-#         return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
-#
-#     # 检验手机号是否正确
-#     if not re.match("^1[345789][0-9]{9}$",mobile):
-#         return jsonify(errno=RET.DATAERR, errmsg="手机号不正确")
-#
-#     # 验证短信验证码
-#     try:
-#         real_sms_code = redis_store.get("SMS_%s" % mobile)
-#         real_sms_code = real_sms_code.decode()
-#         print(real_sms_code)
-#         if not real_sms_code:
-#             return jsonify(errno=RET.DATAERR, errmsg="短信验证码已过期")
-#         # 如果可以获取到真实的图片验证码，则删除掉redis中的文本数据，
-#         redis_store.delete("SMS_"+mobile)
-#     except Exception as e:
-#         current_app.logger.error(e)
-#         # 获取短信验证码失败
-#         return jsonify(errno=RET.DBERR, errmsg="获取短信验证码失败")
-#
-#         # 把用户提交过来的短信验证码和redis中真实短信验证码比较
-#     if real_sms_code != sms_code:
-#         return jsonify(errno=RET.DATAERR, errmsg="短信验证码错误")
-#
-#     # 根据手机号到数据库中查询，当前手机是否已经被注册
-#     num = User.query.filter(User.mobile == mobile).count()
-#     if num > 0:
-#         return jsonify(errno=RET.DATAERR, errmsg="手机号码已经被注册了")
-#
-#     # 3. 保存用户信息
-#     user = User()
-#     user.mobile = mobile
-#     user.password = password
-#     user.nick_name = mobile #使用手机号作为默认的昵称
-#
-#     try:
-#         db.session.add(user)
-#         db.session.commit()
-#     except Exception as e:
-#         db.session.rollback()
-#         current_app.logger.error(e)
-#         return jsonify(errno=RET.DATAERR, errmsg="数据保存错误")
-#
-#     # 注册成功以后，自动保存登陆状态
-#     session["user_id"] = user.id
-#     session["nick_name"] = user.nick_name
-#     session["mobile"] = user.mobile
-#
-#     # 返回注册结果
-#     return jsonify(errno=RET.OK, errmsg="OK")
+@passport_blu.route("/register",methods=["POST"])
+def register():
+    """用户注册，保存用户信息"""
+    # 1. 获取参数和判断是否有值
+    data_dict = request.json
+    mobile = data_dict.get("mobile")
+    sms_code = data_dict.get("sms_code")
+    password = data_dict.get("password")
+    # agree = data_dict.get("agree")  # 是否同意了注册条款
+    print([mobile, sms_code, password])
+
+    if not all([mobile, sms_code, password]):
+        # 参数不全
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    # 2. 从redis中获取指定手机号对应的短信验证码的
+    try:
+        real_sms_code = redis_store.get("sms_code_" + mobile)
+        if real_sms_code:
+            real_sms_code = real_sms_code.decode()
+
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DATAERR, errmsg="获取短信验证码错误")
+
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA, errmsg="短信验证码过期了")
+
+    # 3. 校验短信验证码
+    if real_sms_code != sms_code:
+        return jsonify(errno=RET.PARAMERR, errmsg="短信验证码错误")
+
+    # 4. 初始化 user 模型，并设置数据并添加到数据库
+    user = User()
+    # 把用户提交过来的数据保存模型中
+    user.mobile = mobile
+    user.nick_name = mobile
+    user.password = password
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()  # 回滚事务
+        current_app.logger.error(e)
+        # 数据保存错误
+        return jsonify(errno=RET.DATAERR, errmsg="数据保存错误")
+
+    # 5. 保存当前用户的登陆状态，保存session中
+    session["mobile"] = mobile
+    session["nickname"] = mobile
+    session["user_id"] = user.id
+
+    # 6. 返回注册的结果
+    return jsonify(errno=RET.OK, errmsg="OK")
+
+@passport_blu.route("/login",methods=["POST"])
+def login():
+    """登陆"""
+    #获取参数和判断是否有值,登陆只需要获取手机号和密码
+    json_data = request.json
+    mobile = json_data.get("mobile")
+    password = json_data.get("password")
+
+    if not all([mobile, password]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
+
+    try:
+        user = User.query.filter(mobile==mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="查询数据错误")
+
+    if not user:
+        return jsonify(errno=RET.USERERR,errmsg="用户不存在")
+
+    #校验密码
+    if not user.check_passowrd(password):
+        return jsonify(errno=RET.PWDERR, errmsg="密码错误")
+
+    # 保存登陆状态
+    session["mobile"]=mobile
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+
+    #修改用户的最后登陆时间
+    user.last_login = datetime.now()
+    try:
+        db.session.commit()
+    except Exception as e:
+        #如果出错记录下来即可，没必要阻止用户登陆
+        current_app.logger.error(e)
+
+    #返回结果
+    return jsonify(errno=RET.OK,errmsg="OK")
+
+
+
+
+
+
+
+
+
