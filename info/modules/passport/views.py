@@ -183,7 +183,7 @@ def login():
         return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
 
     try:
-        user = User.query.filter(mobile==mobile).first()
+        user = User.query.filter(User.mobile==mobile).first()
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR,errmsg="查询数据错误")
@@ -193,6 +193,8 @@ def login():
 
     #校验密码
     if not user.check_passowrd(password):
+        print(password)
+        print(user.check_passowrd(password))
         return jsonify(errno=RET.PWDERR, errmsg="密码错误")
 
     # 保存登陆状态
@@ -212,6 +214,15 @@ def login():
     return jsonify(errno=RET.OK,errmsg="OK")
 
 
+@passport_blu.route("/logout",methods=["GET","POST"])
+def logout():
+    """退出登录"""
+    # 清除当前用户的登录状态，# pop 是字典中移除掉指定的键值对成员，第二个参数防止报错，设置默认值
+    session.pop("user_id",None)
+    session.pop("nick_name",None)
+    session.pop("mobile",None)
+
+    return jsonify(errno=RET.OK,errmsg="退出成功")
 
 
 
