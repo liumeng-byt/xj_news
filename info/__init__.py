@@ -10,6 +10,8 @@ from flask_wtf import CSRFProtect
 from flask_session import Session
 
 # 创建保存redis操作对象的全局变量
+
+
 redis_store = None
 # 创建mysql操作对象的变量
 db = SQLAlchemy()
@@ -73,6 +75,10 @@ def create_app(config_name):
     # 把验证蓝图（短信）注册到app
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    # 注册自定义的过滤器（用于点击排行的前三个序号颜色）
+    from info.utils.common import do_index_class
+    app.add_template_filter(do_index_class, "index_class")
 
     return app
 
