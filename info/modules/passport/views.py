@@ -165,7 +165,8 @@ def register():
 
     # 5. 保存当前用户的登陆状态，保存session中
     session["mobile"] = mobile
-    session["nickname"] = mobile
+    # session["nick_name"] = mobile #默认手机号是昵称
+    session["nick_name"] = user.nick_name #默认手机号是昵称
     session["user_id"] = user.id
 
     # 6. 返回注册的结果
