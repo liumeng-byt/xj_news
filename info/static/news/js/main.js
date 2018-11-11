@@ -207,7 +207,8 @@ $(function(){
             },
             success:function (resp) {
                 //刷新界面
-                location.reload()
+                // location.reload() // 重新加载
+                location.href = "/" //返回到主页
             }
 
         })

@@ -29,8 +29,8 @@
             <!-- 用户登录后显示下面，隐藏上面 -->
             {% else %}
             <div class="user_login fr">
-                <img src="../../static/news/images/person01.png" class="lgin_pic">
-                <a href="../../static/news/html/user.html" id="nick_name">用户张三</a>
+                <img src="{% if user.avatar_url %}{{ user.avatar_url }}{% else %}../../static/news/images/cat.jpg{% endif %}" class="lgin_pic">
+                <a href="../../static/news/html/user.html" id="nick_name">{{ user.nick_name}}</a>
                 <a href="javascript:;" id="logout">退出</a>
             </div>
             {% endif %}

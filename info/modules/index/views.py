@@ -8,7 +8,7 @@ from . import index_blu
 # 定义首页视图函数
 @index_blu.route("/")
 def index():
-    # 查看当前已经登录的用户
+    # 通过session 查看当前已经登录的用户
     user_id = session.get("user_id")
     user = None
     if user_id:
