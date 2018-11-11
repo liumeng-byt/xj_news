@@ -123,6 +123,9 @@ $(function(){
             method:"post",
             data:JSON.stringify(params),
             contentType:"application/json",
+            headers:{
+                "X-CSRFToken":getCookie("csrf_token")
+            },
             success:function (resp) {
                 if (resp.errno == "0"){
                     location.reload();
