@@ -205,7 +205,7 @@ $(function(){
             headers:{
                 "X-CSRFToken":getCookie("csrf_token")
             },
-            seccess:function (resp) {
+            success:function (resp) {
                 //刷新界面
                 location.reload()
             }

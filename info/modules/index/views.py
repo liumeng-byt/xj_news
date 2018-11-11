@@ -1,17 +1,25 @@
 from flask import current_app
 from flask import render_template
+from flask import session
+
+from info.models import User
 from . import index_blu
 
 # 定义首页视图函数
 @index_blu.route("/")
 def index():
-    # logging.fatal("致命错误")
-    # logging.error("普通错误！")
-    # logging.warning("警告错误！")
-    # logging.info("普通日志信息！")
-    # logging.debug("调试信息")
+    # 查看当前已经登录的用户
+    user_id = session.get("user_id")
+    user = None
+    if user_id:
+        try:
+            user = User.query.get(user_id)
+        except Exception as e:
+            current_app.logger.error(e)
+
+
     title = "首页-新经资讯网"
-    return render_template("news/index.html",title=title)
+    return render_template("news/index.html",title=title,user=user)
 
 
 # 显示logo图标的视图函数
