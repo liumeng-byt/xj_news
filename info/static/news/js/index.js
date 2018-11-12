@@ -70,8 +70,41 @@ function updateNewsData() {
         "page": cur_page,
         "per_page": 50
     };
-
+    data_querying = false;
     // TODO 更新新闻数据
-
+    $.ajax({
+        url:"/news_list",
+        method:"get",
+        data:params,
+        dataType:"json",
+        success: function(resp){
+            if(resp.errno==0){
+                // 请求成功以后，把通过js把新闻内容进行替换
+                // 先清空原有数据
+                if (cur_page == 1) {
+                    $(".list_con").html('');
+                }
+                htmlContent = "";
+                for (var i=0;i<resp.newsList.length;i++) {
+                    var news = resp.newsList[i];
+                    htmlContent += '<li>';
+                    htmlContent += '<a href="#" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>';
+                    htmlContent += '<a href="#" class="news_title fl">' + news.title + '</a>';
+                    htmlContent += '<a href="#" class="news_detail fl">' + news.digest + '</a>';
+                    htmlContent += '<div class="author_info fl">';
+                    htmlContent += '<div class="source fl">来源：' + news.source + '</div>';
+                    htmlContent += '<div class="time fl">' + news.create_time + '</div>';
+                    htmlContent += '</div>';
+                    htmlContent += '</li>';
+                }
+                $(".list_con").append(htmlContent);
+                // 修改当前js的获取数据的状态为flase，表示已经获取完数据了
+                data_querying = false
+                // 根据后端返回的总页码和当前页码，重新设置
+                total_page = resp.totalPage
+                cur_page = resp.currentPage
+            }
+        }
+    })
 
 }

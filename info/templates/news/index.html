@@ -92,11 +92,13 @@
             <div class="rank_title">
                 <h3>点击排行</h3>
             </div>
+
             <ul class="rank_list">
-                {% for item in news_list %}
+                {% for item in news_clicks %}
                 <li><span class="{{ loop.index | index_class  }}">{{ loop.index }}</span><a href="#">{{ item.title }}</a></li>
                 {% endfor %}
             </ul>
+
         </div>
     </div>
     <div class="footer">        
