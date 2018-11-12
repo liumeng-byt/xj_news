@@ -78,7 +78,7 @@ def create_app(config_name):
 
     # 注册自定义的过滤器（用于点击排行的前三个序号颜色）
     from info.utils.common import do_index_class
-    app.add_template_filter(do_index_class, "index_class")
+    app.add_template_filter(do_index_class, "index_class") #过滤器可直接在html中使用，不需要用return render_template("news/index.html",a=a)的形式
 
     return app
 

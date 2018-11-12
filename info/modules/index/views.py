@@ -3,7 +3,7 @@ from flask import render_template
 from flask import session
 
 from info import constants
-from info.models import User, News
+from info.models import User, News, Category
 from . import index_blu
 
 # 定义首页视图函数
@@ -19,14 +19,17 @@ def index():
             current_app.logger.error(e)
     news_list=None
     try:
-        news_list = News.query.order_by(News.clicks.desc()).limit(constants.HOME_PAGE_MAX_NEWS).all()
+        news_list = News.query.order_by(News.clicks.desc()).limit(constants.HOME_PAGE_MAX_NEWS)
         # print(news_list)
     except Exception as e:
         current_app.logger.error(e)
 
+    # 获取新闻分类
+    categorys=Category.query.all()
+    print(categorys)
 
     title = "首页-新经资讯网"
-    return render_template("news/index.html",title=title,user=user,news_list=news_list)
+    return render_template("news/index.html",title=title,user=user,news_list=news_list,categorys=categorys)
 
 
 
