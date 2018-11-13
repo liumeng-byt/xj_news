@@ -1,25 +1,22 @@
 from flask import current_app, jsonify
+from flask import g
 from flask import render_template
 from flask import request
 from flask import session
 
 from info import constants
 from info.models import User, News, Category
+from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import index_blu
 
 
 # 定义首页视图函数
 @index_blu.route("/")
+@user_login_data
 def index():
     # 右上角登陆退出功能显示  通过session 查看当前已经登录的用户
-    user_id = session.get("user_id")
-    user = None
-    if user_id:
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger.error(e)
+    user = g.user
 
     # 点击排行
     news_clicks = None

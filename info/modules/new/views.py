@@ -1,15 +1,18 @@
 from flask import abort
 from flask import current_app
+from flask import g
 from flask import render_template
 from flask import session
 
 from info import constants
 from info import db
 from info.models import News, User
+from info.utils.common import user_login_data
 from . import news_blu
 
 
 @news_blu.route("/<int:news_id>")
+@user_login_data
 def detail(news_id):
     """新闻详情"""
     try:
@@ -37,14 +40,8 @@ def detail(news_id):
         current_app.logger.error(e)
 
     # 查询当前登陆的用户信息
-    user_id = session.get("user_id")
-
-    user = None
-    if user_id:
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger.error(e)
+    # 上面的视图函数已经被装饰器user_login_data 装饰了，所以直接从g.user提取即可
+    user = g.user
 
 
     return render_template("news/detail.html",

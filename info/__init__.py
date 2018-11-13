@@ -2,6 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import current_app
+from flask import g
 from flask import render_template
 from flask import session
 from flask.ext.wtf.csrf import generate_csrf
@@ -12,7 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_session import Session
 
-
+from info.utils.common import user_login_data
 
 redis_store = None
 # 创建mysql操作对象的变量
@@ -89,21 +90,16 @@ def create_app(config_name):
     # 捕获404异常，显示404页面
     from info.models import User
     @app.errorhandler(404)
+    @user_login_data
     def page_not_found(_): # 如果某些变量或者参数表示没有意义的，可以用 _ 占位
-        user_id = session.get("user_id")
+        user = g.user
 
-        if user_id:
-            try:
-                user = User.query.get(user_id)
-            except Exception as e:
-                current_app.logger.error(e)
+        data = {"user_info":user if user else None}
 
         return render_template("news/404.html",
                                user=user,
+                               data=data
                                )
-
-
-
 
 
     return app
