@@ -74,7 +74,7 @@ function updateNewsData() {
     // TODO 更新新闻数据
     $.ajax({
         url:"/news_list",
-        method:"get",
+        method:"GET",
         data:params,
         dataType:"json",
         success: function(resp){
@@ -88,9 +88,9 @@ function updateNewsData() {
                 for (var i=0;i<resp.newsList.length;i++) {
                     var news = resp.newsList[i];
                     htmlContent += '<li>';
-                    htmlContent += '<a href="#" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>';
-                    htmlContent += '<a href="#" class="news_title fl">' + news.title + '</a>';
-                    htmlContent += '<a href="#" class="news_detail fl">' + news.digest + '</a>';
+                    htmlContent += '<a href="/news/'+news.id+'" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>';
+                    htmlContent += '<a href="/news/'+news.id+'" class="news_title fl">' + news.title + '</a>';
+                    htmlContent += '<a href="/news/'+news.id+'" class="news_detail fl">' + news.digest + '</a>';
                     htmlContent += '<div class="author_info fl">';
                     htmlContent += '<div class="source fl">来源：' + news.source + '</div>';
                     htmlContent += '<div class="time fl">' + news.create_time + '</div>';
