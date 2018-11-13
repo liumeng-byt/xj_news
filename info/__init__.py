@@ -88,17 +88,17 @@ def create_app(config_name):
     app.register_blueprint(news_blu)
 
     # 捕获404异常，显示404页面
-    from info.models import User
+    # from info.models import User
     @app.errorhandler(404)
     @user_login_data
     def page_not_found(_): # 如果某些变量或者参数表示没有意义的，可以用 _ 占位
         user = g.user
 
-        data = {"user_info":user if user else None}
+        # data = {"user_info":user if user else None}
 
         return render_template("news/404.html",
                                user=user,
-                               data=data
+                               # data=data
                                )
 
 
