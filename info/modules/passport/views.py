@@ -224,10 +224,3 @@ def logout():
     session.pop("mobile",None)
 
     return jsonify(errno=RET.OK,errmsg="退出成功")
-
-
-
-
-
-
-

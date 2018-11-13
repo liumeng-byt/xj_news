@@ -80,6 +80,12 @@ def create_app(config_name):
     from info.utils.common import do_index_class
     app.add_template_filter(do_index_class, "index_class") #过滤器可直接在html中使用，不需要用return render_template("news/index.html",a=a)的形式
 
+    # 注册新闻详情页蓝图
+    from info.modules.new import news_blu
+    app.register_blueprint(news_blu)
+
+
+
     return app
 
 # app=create_app("development") manage.py里 app接收的是上面的 return app

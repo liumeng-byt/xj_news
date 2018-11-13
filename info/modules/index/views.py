@@ -57,7 +57,6 @@ def news_list():
     page = data_dict.get("page",1) # 当前页码
     cid = data_dict.get("cid",1)   # 新闻分类ID
     per_page = data_dict.get("per_page",constants.HOME_PAGE_MAX_NEWS)  # 允许前端指定每一页的数据量，默认10
-    print(per_page)
     try:
         page = int(page)
         per_page = int(per_page)
