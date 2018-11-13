@@ -1,6 +1,9 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+from flask import current_app
+from flask import render_template
+from flask import session
 from flask.ext.wtf.csrf import generate_csrf
 from redis import StrictRedis
 from config import config
@@ -9,7 +12,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_session import Session
 
-# 创建保存redis操作对象的全局变量
 
 
 redis_store = None
@@ -83,6 +85,24 @@ def create_app(config_name):
     # 注册新闻详情页蓝图
     from info.modules.new import news_blu
     app.register_blueprint(news_blu)
+
+    # 捕获404异常，显示404页面
+    from info.models import User
+    @app.errorhandler(404)
+    def page_not_found(_): # 如果某些变量或者参数表示没有意义的，可以用 _ 占位
+        user_id = session.get("user_id")
+
+        if user_id:
+            try:
+                user = User.query.get(user_id)
+            except Exception as e:
+                current_app.logger.error(e)
+
+        return render_template("news/404.html",
+                               user=user,
+                               )
+
+
 
 
 
