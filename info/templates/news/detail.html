@@ -22,7 +22,8 @@
             
         <a href="javascript:;" class="collection block-center" data-news-id="{{ news.id }}" style="display: {% if is_collected %}none{% else %}block{% endif %}">收藏</a>
         <a href="javascript:;" class="collected block-center" data-news-id="{{ news.id }}" style="display: {% if not is_collected %}none{% else %}block{% endif %}"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
-        
+
+        //以下是根据用户的登陆状态显示评论窗口
         {% if not user %}
         <div class="comment_form_logout">
             登录发表你的评论
