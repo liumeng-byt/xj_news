@@ -110,7 +110,8 @@ def news_collect():
     return jsonify(errno=RET.OK, errmsg="操作成功")
 
 
-@news_blu.route("/news_comment")
+@news_blu.route("/news_comment",methods=["POST"])
+@user_login_data
 def news_comment():
     """用户评论的新闻/回复评论"""
     user = g.user
@@ -121,7 +122,7 @@ def news_comment():
     # 获取参数
     data_dict = request.json
     news_id = data_dict.get("news_id") # 哪一条新闻
-    comment_str = data_dict.get("comment") # 评论内容
+    comment_str = data_dict.get("content") # 评论内容
     parent_id = data_dict.get("parent_id") # 被评论id（要知道回复谁）
 
     # 校验参数
@@ -152,7 +153,7 @@ def news_comment():
 
     # 初始化完后，保存数据
     try:
-        db,session.add(comment)
+        db.session.add(comment)
         db.session.commit()
     except Exception as e:
         current_app .logger.error(e)

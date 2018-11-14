@@ -74,6 +74,21 @@ class User(BaseModel, db.Model):
         # 检验密码是否正确，正确为true
         return check_password_hash(self.password_hash, password)
 
+    def to_dict(self):
+        """将用户对象信息转换为字典数据"""
+        resp_dict = {
+            "id": self.id,
+            "nick_name": self.nick_name,
+            "mobile": self.mobile,
+            "avatar_url": self.avatar_url,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_login": self.last_login.strftime("%Y-%m-%d %H:%M:%S"),
+            "gender": self.gender,
+            "signature": self.signature,
+        }
+
+        return resp_dict
+
 
 class News(BaseModel, db.Model):
     """新闻"""
