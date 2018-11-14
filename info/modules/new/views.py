@@ -45,11 +45,18 @@ def detail(news_id):
     # 上面的视图函数已经被装饰器user_login_data 装饰了，所以直接从g.user提取即可
     user = g.user
 
+    #查询当前用户是否已经收藏了当前新闻
+    is_collected = False # 默认没有收藏，因为有可能用户是没有登陆的
+    # 首先判断用户是否登陆，如果已登录,收藏记录存在，就到页面中把已收藏显示出来并隐藏收藏
+    if user:
+        if news in user.collection_news:
+            is_collected = True
 
     return render_template("news/detail.html",
                            user=user,
                            news_list=news_list,
-                           news=news
+                           news=news,
+                           is_collected=is_collected
                            )
 
 
