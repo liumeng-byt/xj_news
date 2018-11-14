@@ -28,7 +28,7 @@ def detail(news_id):
 
     # 如果查到数据，则记录点击量,并提交到库里
     news.clicks += 1
-    print(news.clicks)
+
     try:
         db.session.commit()
     except Exception as e:
@@ -66,32 +66,38 @@ def news_collect():
     if not user:
         return jsonify(errno=RET.SESSIONERR,errmsg="用户未登陆")
 
+    # 如果没有登陆
     if not news_id:
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
+    # 如果请求不属于collect，cancel_collect
     if action not in ("collect","cancel_collect"):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
+    # 拿到参数后，到库里查询
     try:
         news = News.query.get(news_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="查询数据失败")
 
+    # 如果没有查询到
     if not news:
         return jsonify(errno=RET.NODATA, errmsg="新闻数据不存在")
 
+    # 收藏
     if action == "collect":
-        user.collection_news.append(news)
+        user.collection_news.append(news) #添加一条收藏记录
+    # 取消收藏
     else:
-        user.collection_news.remove(news)
+        user.collection_news.remove(news) # 删除一条收藏记录
 
     try:
-        db.session.commit()
+        db.session.commit() # 提交
     except Exception as e:
         current_app.logger.error(e)
-        db.session.rollback()
+        db.session.rollback() # 提交失败时 回滚事物
         return jsonify(errno=RET.DBERR, errmsg="保存失败")
 
-    #返回结果
+    # 最后返回结果
     return jsonify(errno=RET.OK, errmsg="操作成功")

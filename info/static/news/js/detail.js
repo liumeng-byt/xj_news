@@ -15,7 +15,7 @@ $(function(){
     $(".collection").click(function () {
         // 获取收藏的`新闻id`
         var news_id = $(this).attr("data-news-id");
-        var action = "do";
+        var action = "collect";
 
         // 组织参数
         var params = {
@@ -24,7 +24,34 @@ $(function(){
         };
 
         // TODO 请求收藏新闻
+        $.ajax({
+            url:"/news/news_collect",
+            data:JSON.stringify(params),
+            method:"POST",
+            contentType:"application/json",
+            dataType:"json",
+            headers:{
+                "X-CSRFToken": getCookie("csrf_token"),
+            },
+            success:function (resp) {
+                if (resp.errno == 0) {
+                    //成功
+                    //隐藏收藏按钮
+                    $(".collection").hide();
+                    //显示已收藏按钮
+                    $(".collected").show()
 
+                }else if(resp.errno == 4101){
+                    //如果没有登陆就显示登陆框
+                    $(".login_form_con").show();
+                }else {
+                    //失败
+                    alert(resp.errmsg)
+                }
+            }
+
+
+        })
        
     });
 
@@ -32,7 +59,7 @@ $(function(){
     $(".collected").click(function () {
         // 获取收藏的`新闻id`
         var news_id = $(this).attr("data-news-id");
-        var action = "undo";
+        var action = "cancel_collect";
 
         // 组织参数
         var params = {
@@ -41,7 +68,34 @@ $(function(){
         };
 
         // TODO 请求取消收藏新闻
+        $.ajax({
+            url:"/news/news_collect",
+            data:JSON.stringify(params),
+            method:"POST",
+            contentType:"application/json",
+            dataType:"json",
+            headers:{
+                "X-CSRFToken": getCookie("csrf_token"),
+            },
+            success:function (resp) {
+                if (resp.errno == 0) {
+                    //成功
+                    //显示取消收藏按钮
+                    $(".collected").hide();
+                    //隐藏收藏按钮
+                    $(".collection").show()
 
+                }else if(resp.errno == 4101){
+                    //如果没有登陆就显示登陆框
+                    $(".login_form_con").show();
+                }else {
+                    //失败
+                    alert(resp.errmsg)
+                }
+            }
+
+
+        })
 
     });
 
