@@ -7,7 +7,7 @@ from flask import session
 
 from info import constants
 from info import db
-from info.models import News, User
+from info.models import News, User, Comment
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import news_blu
@@ -108,3 +108,91 @@ def news_collect():
 
     # 最后返回结果
     return jsonify(errno=RET.OK, errmsg="操作成功")
+
+
+@news_blu.route("/news_comment")
+def news_comment():
+    """用户评论的新闻/回复评论"""
+    user = g.user
+    # 判断是否已登录
+    if not user:
+        return jsonify(errno=RET.SESSIONERR,errmsg="用户未登录")
+
+    # 获取参数
+    data_dict = request.json
+    news_id = data_dict.get("news_id") # 哪一条新闻
+    comment_str = data_dict.get("comment") # 评论内容
+    parent_id = data_dict.get("parent_id") # 被评论id（要知道回复谁）
+
+    # 校验参数
+    if not all([news_id,comment_str]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
+
+    # 如果参数存在,就到数据库查询
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="查询数据失败")
+
+    # 判断有没有查询到数据
+    if not news:
+        return jsonify(errno=RET.NODATA,errmsg="该新闻不存在")
+
+
+    # 如果查到数据，在数据库操作记录（初始化 Comment 模型）
+    comment = Comment()
+    comment.user_id = user.id
+    comment.news_id = news_id
+    comment.content = comment_str
+    if parent_id:
+        """如果是回复评论，则需要添加parent_id"""
+        comment.parent_id = parent_id
+
+
+    # 初始化完后，保存数据
+    try:
+        db,session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        current_app .logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="保存评论数据失败")
+
+    # 被评论后，评论次数 +1 ，在更新新闻的评论总数 comments_count
+    news.comments_count += 1
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e) # 无需返回页面
+
+
+    # 返回结果，因为是局部刷新，所以需要把新增的评论一并返回
+    return jsonify(errno=RET.OK,errmsg = "评论成功",data=comment.to_dict())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
