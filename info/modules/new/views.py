@@ -63,8 +63,10 @@ def detail(news_id):
     # 查询当前作者的信息
     author = news.user
 
+
     # 查询当前作者发布的新闻总数
     news_list_count = author.news_list.count()
+
 
     # 查询到当前所有粉丝
     fans_count = author.followers.count()
@@ -246,6 +248,81 @@ def comment_like():
 
     # 返回结果
     return jsonify(errno=RET.OK,errmsg="操作成功",like_count=comment.like_count)
+
+
+@news_blu.route("/author_fans",methods=["POST"])
+@user_login_data
+def author_fans():
+    """当前登录用户关注作者"""
+    # 1.就收参数
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR,errmsg="用户未登录")
+
+    data_dict = request.json
+    author_id = data_dict.get("author_id")
+    action = data_dict.get("action")
+
+    # 校验数据
+    if not all([author_id,action]):
+        return jsonify(errno=RET.SESSIONERR,errmsg="参数错误")
+
+    if action not in ("follow","cancel_follow"):
+        return jsonify(errno=RET.SESSIONERR,errmsg="参数错误")
+
+    try:
+        author =User.query.get(author_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="查询数据失败")
+
+    # 判断作者是否存在
+    if not author:
+        return jsonify(errno=RET.NODATA,errmsg="新闻作者不存在")
+
+    if action == "follow":
+        #关注
+        author.followers.append(user)
+    else:
+        #取消关注
+        author.followers.remove(user)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg="保存失败")
+
+    # 返回响应结果，返回粉丝数量
+    followers_count = author.followers.count()
+
+
+    return jsonify(errno=RET.OK,errmsg="操作成功",followers_count=followers_count)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

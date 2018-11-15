@@ -14,12 +14,12 @@
 
         <div class="form-group">
             <label>个性签名：</label>
-            <input id="signature" type="text" name="signature" value="{{user.signature | default('',True)}}" class="input_txt">
+            <input id="signature" type="text" name="signature" value="{{user.signature | default('无签名，不个性',True)}}" class="input_txt">
         </div>
 
         <div class="form-group">
             <label>用户昵称：</label>
-            <input id="nick_name" type="text" name="nick_name" value="user.nick_name" class="input_txt">
+            <input id="nick_name" type="text" name="nick_name" value="{{ user.nick_name | default('无昵称',True)}}" class="input_txt">
         </div>
         <div class="form-group">
             <label>性别：</label>
