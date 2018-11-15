@@ -52,11 +52,21 @@ def detail(news_id):
         if news in user.collection_news:
             is_collected = True
 
+    # 查询当前新闻的所有评论
+    comment_list = []
+    try:
+        comment_list = Comment.query.filter(Comment.news_id == news.id).order_by(Comment.create_time.desc())
+    except Exception as e:
+        current_app.logger.error(e)
+
+
+
     return render_template("news/detail.html",
-                           user=user,
-                           news_list=news_list,
-                           news=news,
-                           is_collected=is_collected
+                           user = user,
+                           news_list = news_list,
+                           news = news,
+                           is_collected = is_collected,
+                           comment_list = comment_list
                            )
 
 
@@ -125,6 +135,7 @@ def news_comment():
     comment_str = data_dict.get("content") # 评论内容
     parent_id = data_dict.get("parent_id") # 被评论id（要知道回复谁）
 
+
     # 校验参数
     if not all([news_id,comment_str]):
         return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
@@ -132,6 +143,7 @@ def news_comment():
     # 如果参数存在,就到数据库查询
     try:
         news = News.query.get(news_id)
+        print(news)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR,errmsg="查询数据失败")
