@@ -7,13 +7,13 @@
 {% block content %}
 		<div class="user_menu_con fl">
 			<div class="user_center_pic">
-				<img src="{{ user.avatar_url|default("../../static/news/images/user_pic.png",True) }}" alt="用户图片">
+				<img src="{{ user.avatar_url|default('../../static/news/images/user_pic.png',True) }}" alt="用户图片">
 			</div>
 			<div class="user_center_name">{{ user.nick_name }}</div>
 
 			<ul class="option_list">
-				<li class="active"><a href="{{ url_for("user.user_base_info") }}" target="main_frame">基本资料</a></li>
-				<li><a href="{{ url_for("user.user_pic_info") }}" target="main_frame">头像设置</a></li>
+				<li class="active"><a href="{{ url_for('user.user_base_info') }}" target="main_frame">基本资料</a></li>
+				<li><a href="{{ url_for('user.user_pic_info') }}" target="main_frame">头像设置</a></li>
 				<li><a href="../../static/news/html/user_follow.html" target="main_frame">我的关注</a></li>
 				<li><a href="../../static/news/html/user_pass_info.html" target="main_frame">密码修改</a></li>
 				<li><a href="../../static/news/html/user_collection.html" target="main_frame">我的收藏</a></li>
@@ -25,6 +25,6 @@
 {% block rank %}
 		<div class="user_con fr">
             {# iframe　是一个html标签，作用就是让一个浏览器窗口展示多个html网页 #}
-			<iframe src="{{ url_for("user.user_base_info") }}" frameborder="0" name="main_frame" class="main_frame" id="main_frame"></iframe>
+			<iframe src="{{ url_for('user.user_base_info') }}" frameborder="0" name="main_frame" class="main_frame" id="main_frame"></iframe>
 		</div>
 {% endblock rank %}
