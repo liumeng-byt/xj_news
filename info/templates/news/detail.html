@@ -9,8 +9,8 @@
         <div class="detail_con fl">
             <h3>{{ news.title }}</h3>
             <div class="detail_about clearfix">
-                <span class="time_souce fl">{{ news.create_time }} 来源: {{ news.source }}</span>
-                <span class="comment fr">3</span>
+                <span class="time_souce fl">{{ news.create_time }} 来源: {{news.source }}</span>
+                <span class="comment fr">{{ news.comments_count }}</span> <!--总评论量-->
             </div>
 
             <p class="summary">
@@ -82,15 +82,17 @@
 {% endblock content %}
 {% block rank %}
         <div class="rank_con fr">
+            {% if author %}
             <div class="author_card">
-                <a href="#" class="author_pic"><img src="../../static/news/images/user_pic.png" alt="author_pic"></a>
-                <a href="#" class="author_name">张大山</a>
-                <div class="author_resume">张大山的简介,张大山</div>
-                <div class="writings"><span>总篇数</span><b>23</b></div>
-                <div class="follows"><span>粉丝</span><b>36</b></div>
+                <a href="#" class="author_pic"><img src="{{ author.avatar_url  | default('../../static/news/images/dog.png',True) }}" alt="author_pic"></a>
+                <a href="#" class="author_name">{{ author.nick_name }}</a>
+                <div class="author_resume"> {{ author.signature | default('无个性，不签名',True)  }}  </div>
+                <div class="writings"><span>总篇数</span><b>{{ news_list_count }}</b></div>
+                <div class="follows"><span>粉丝</span><b>{{ fans_count }}</b></div>
                 <a href="javascript:;" class="focus fr">关注</a>
                 <a href="javascript:;" class="focused fr"><span class="out">已关注</span><span class="over">取消关注</span></a>
-            </div>            
+            </div>
+            {% endif %}
             <div class="rank_title">
                 <h3>点击排行</h3>
             </div>

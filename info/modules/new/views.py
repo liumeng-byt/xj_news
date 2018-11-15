@@ -60,12 +60,24 @@ def detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
+    # 查询当前作者的信息
+    author = news.user
+
+    # 查询当前作者发布的新闻总数
+    news_list_count = author.news_list.count()
+
+    # 查询到当前所有粉丝
+    fans_count = author.followers.count()
+
     return render_template("news/detail.html",
                            user=user,
                            news_list=news_list,
                            news=news,
                            is_collected=is_collected,
-                           comment_list=comment_list
+                           comment_list=comment_list,
+                           author=author,
+                           news_list_count=news_list_count,
+                           fans_count=fans_count
                            )
 
 
@@ -237,7 +249,3 @@ def comment_like():
 
 
 
-
-
-
-# 3.根据action执行操作
