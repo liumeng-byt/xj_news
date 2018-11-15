@@ -71,6 +71,12 @@ def detail(news_id):
     # 查询到当前所有粉丝
     fans_count = author.followers.count()
 
+    #查询当前用户是否已经关注作者
+    is_follow = False #默认未关注
+    if user:
+        if author in user.followed:
+            is_follow = True
+
     return render_template("news/detail.html",
                            user=user,
                            news_list=news_list,
@@ -79,7 +85,8 @@ def detail(news_id):
                            comment_list=comment_list,
                            author=author,
                            news_list_count=news_list_count,
-                           fans_count=fans_count
+                           fans_count=fans_count,
+                           is_follow=is_follow
                            )
 
 

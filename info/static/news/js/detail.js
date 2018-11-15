@@ -322,12 +322,74 @@ $(function(){
     });
 
     // 关注当前新闻作者
+    // 关注当前新闻作者
     $(".focus").click(function () {
+            // 获取参数
+            $this = $(this);
+            author_id = $this.attr("data-author-id");
+            // 组织参数
+            var params = {
+                "author_id": author_id,
+                "action": "follow",
+            };
 
+            $.ajax({
+                url:"/news/author_fans",
+                data: JSON.stringify(params),
+                type: "post",
+                contentType: "application/json",
+                headers: {
+                    "X-CSRFToken": getCookie("csrf_token")
+                },
+                success: function(resp){
+                    if(resp.errno == 0){
+                        // 关注成功
+                        // 更新作者粉丝数量
+                        $(".follows b").html(resp.followers_count);
+                        $(".focus").hide();
+                        $(".focused").show();
+
+                    }else if(resp.errno == 4101){
+                        $('.login_form_con').show();
+                    }else{
+                        alert(resp.errmsg);
+                    }
+                }
+            });
     });
 
     // 取消关注当前新闻作者
     $(".focused").click(function () {
+            // 获取参数
+            author_id = $(this).attr("data-author-id");
+            // 组织参数
+            var params = {
+                "author_id": author_id,
+                "action": "cancel_follow",
+            };
 
+            $.ajax({
+                url:"/news/author_fans",
+                data: JSON.stringify(params),
+                type: "post",
+                contentType: "application/json",
+                headers: {
+                    "X-CSRFToken": getCookie("csrf_token")
+                },
+                success: function(resp){
+                    if(resp.errno == 0){
+                        // 关注成功
+                        // 更新作者粉丝数量
+                        $(".follows b").html(resp.followers_count);
+                        $(".focused").hide();
+                        $(".focus").show();
+
+                    }else if(resp.errno == 4101){
+                        $('.login_form_con').show();
+                    }else{
+                        alert(resp.errmsg);
+                    }
+                }
+            })
     });
 });
