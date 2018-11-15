@@ -87,6 +87,11 @@ def create_app(config_name):
     from info.modules.new import news_blu
     app.register_blueprint(news_blu)
 
+    # 注册个人中心蓝图
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
+
+
     # 捕获404异常，显示404页面
     # from info.models import User
     @app.errorhandler(404)
