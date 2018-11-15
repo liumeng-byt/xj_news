@@ -181,7 +181,7 @@ def news_comment():
 
 
 # 点赞
-@news_blu.route("/comment_like")
+@news_blu.route("/comment_like",methods=["POST"])
 @user_login_data
 def comment_like():
     """用户点赞，取消点赞"""
@@ -233,7 +233,7 @@ def comment_like():
         return jsonify(eerno=RET.DBERR,errmsg="操作失败")
 
     # 返回结果
-    return jsonify(errno=RET.OK,errmsg="操作成功",like_count=comment.like.count)
+    return jsonify(errno=RET.OK,errmsg="操作成功",like_count=comment.like_count)
 
 
 
