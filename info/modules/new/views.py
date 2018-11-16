@@ -60,16 +60,18 @@ def detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
+
     # 查询当前作者的信息
     author = news.user
+    news_list_count = 0
+    fans_count = 0
 
+    if author:
+        # 查询当前作者发布的新闻总数
+        news_list_count = author.news_list.count()
 
-    # 查询当前作者发布的新闻总数
-    news_list_count = author.news_list.count()
-
-
-    # 查询到当前所有粉丝
-    fans_count = author.followers.count()
+        # 查询到当前所有粉丝
+        fans_count = author.followers.count()
 
     #查询当前用户是否已经关注作者
     is_follow = False #默认未关注
