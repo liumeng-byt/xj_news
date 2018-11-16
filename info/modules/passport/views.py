@@ -16,7 +16,7 @@ from . import passport_blu
 from info.utils.captcha.captcha import captcha
 from flask import make_response
 
-
+#图片验证功能
 @passport_blu.route("/image_code")
 def image_code():
     """图片验证功能"""
@@ -48,7 +48,7 @@ def image_code():
     response.headers["Content-Type"] = "image/jpeg"  # 【设置响应头】告诉浏览器，返回内容的格式是图片
     return response
 
-
+#发送短信功能
 @passport_blu.route("/sms_code", methods=["POST"])
 def sms_code():
     """发送短信功能"""
@@ -115,7 +115,7 @@ def sms_code():
     # 8. 响应结果给客户端
     return jsonify(errno=RET.OK, errmsg="发送成功")
 
-
+#用户注册，保存用户信息
 @passport_blu.route("/register",methods=["POST"])
 def register():
     """用户注册，保存用户信息"""
@@ -172,6 +172,8 @@ def register():
     # 6. 返回注册的结果
     return jsonify(errno=RET.OK, errmsg="OK")
 
+
+#登陆
 @passport_blu.route("/login",methods=["POST"])
 def login():
     """登陆"""
@@ -214,7 +216,7 @@ def login():
     #返回结果
     return jsonify(errno=RET.OK,errmsg="OK")
 
-
+#退出登录
 @passport_blu.route("/logout",methods=["GET","POST"])
 def logout():
     """退出登录"""

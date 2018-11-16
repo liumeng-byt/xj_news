@@ -45,7 +45,7 @@ def favicon():
     return current_app.send_static_file("news/favicon.ico")
 
 
-
+#ajax请求新闻列表数据
 @index_blu.route("/news_list")
 def news_list():
     """ajax请求新闻列表数据"""

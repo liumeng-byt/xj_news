@@ -23,7 +23,7 @@
             <!-- 用户登录后显示下面，隐藏上面 -->
             <div class="user_login fr">
                 <img src="{% if user.avatar %}{{ user.avatar_url }}{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
-                <a href="user.html" id="nick_name">{{ user.nick_name }}</a>
+                <a href="{{ url_for('user.user_info') }}" id="nick_name">{{ user.nick_name }}</a>
                 <a href="javascript:;" id="logout">退出</a>
             </div>
             {% endif %}

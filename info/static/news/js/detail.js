@@ -75,7 +75,7 @@ $(function(){
             contentType:"application/json",
             dataType:"json",
             headers:{
-                "X-CSRFToken": getCookie("csrf_token"),
+                "X-CSRFToken": getCookie("csrf_token")
             },
             success:function (resp) {
                 if (resp.errno == 0) {

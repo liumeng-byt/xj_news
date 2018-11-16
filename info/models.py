@@ -85,6 +85,9 @@ class User(BaseModel, db.Model):
             "last_login": self.last_login.strftime("%Y-%m-%d %H:%M:%S"),
             "gender": self.gender,
             "signature": self.signature,
+            # "total_page":self.total_page,
+            # "current_page":self.current_page,
+            # "user_dict_li":self.user_dict_li
         }
 
         return resp_dict

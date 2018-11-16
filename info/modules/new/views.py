@@ -259,6 +259,7 @@ def comment_like():
     return jsonify(errno=RET.OK,errmsg="操作成功",like_count=comment.like_count)
 
 
+#当前登录用户关注作者
 @news_blu.route("/author_fans",methods=["POST"])
 @user_login_data
 def author_fans():

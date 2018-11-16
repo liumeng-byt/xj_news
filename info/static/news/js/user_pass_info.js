@@ -36,10 +36,28 @@ $(function () {
         // 组织参数
         var params = {
             "old_password": old_password,
-            "new_password": new_password
+            "new_password": new_password,
+            "new_password2": new_password2
         };
         
         // TODO: 请求修改用户密码
-
+        $.ajax({
+            url:"/user/pass_info",
+            method:"POST",
+            data:JSON.stringify(params),
+            contentType:"application/json",
+            headers:{
+                "X-CSRFToken":getCookie("csrf_token")
+            },
+            success:function (resp) {
+                if (resp.errno == 0){
+                    //修改成功
+                    alert("修改成功");
+                    window.location.reload()
+                }else {
+                    alert(resp.errmsg)
+                }
+            }
+        })
     })
 });
