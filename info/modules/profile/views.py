@@ -1,11 +1,14 @@
 from flask import current_app
 from flask import g, jsonify
+from flask import redirect
 from flask import render_template
 from flask import request
 from flask import session
+from flask import url_for
 
 from info import constants
 from info import user_login_data, db
+from info.models import News, Category
 from info.modules.profile import profile_blu
 from info.utils.common import file_storage
 from info.utils.response_code import RET
@@ -202,3 +205,157 @@ def pass_info():
 
         # 4. 返回结果
         return jsonify(errno=RET.OK, errmsg="保存成功")
+
+
+# 用户发布新闻的 列表页面
+@profile_blu.route("/user_news_list",methods=["GET"])
+@user_login_data
+def user_news_list():
+    """用户发布新闻列表页面"""
+    # 根据当前用户的id查询对应的发布新闻
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+
+    page = request.args.get("p",1) # 当前页码
+    per_page = request.args.get("per_page",1) # 每页数据量
+
+    try:
+        page = int(page)
+        per_page = int(per_page)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # 总页码初始为1
+    total_page = 1
+    try:
+        pagenation = News.query.filter(News.user_id == user.id).order_by(News.id.desc()).paginate(page,per_page,False)
+
+        # 获取总页码
+        total_page = pagenation.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    return render_template("news/user_news_list.html",total_page=total_page)
+
+
+
+# ajax提供数据分页
+@profile_blu.route("/user_get_news_list",methods=["GET"])
+@user_login_data
+def user_get_new_list():
+    """ajax提供数据分页"""
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR,errmsg="用户未登录")
+    # 接收参数
+    # 从地址栏上面获取的数据，同意都是字符串，要进行分页，密码和每页数据量必须是int类型
+    page = int(request.args.get("p",1)) # 当前页
+    per_page = int(request.args.get("per_page",constants.OTHER_NEWS_PAGE_MAX_COUNT)) # 每页数据量
+
+    # 初始化变量
+    total_page = 1
+    news_li = []
+    current_page = 1
+
+    # 根据当前用户的user_id查询所发布的新闻信息
+    try:
+        pagination = News.query.filter(News.user_id == user.id).order_by(News.id.desc()).paginate(page,per_page,False)
+
+        # 获取当前页数据列表（是一个列表，成员是每一个数据模型的对象）
+        news_li = pagination.items
+        # 获取当前页
+        current_page = pagination.page
+        # 获取总页数
+        total_page = pagination.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # 因为接下来要返回数据给ajax,所以需要把对象转成字典
+    news_dict_li = []
+    for item in news_li:
+        news_dict_li.append(item.to_basic_dict())
+
+    return jsonify(errno =RET.OK,errmsg="操作成功",
+                   news_dict_li=news_dict_li,
+                   current_page=current_page,
+                   total_page=total_page
+                   )
+
+
+# 发布新闻
+@profile_blu.route("/user_news_release",methods=["GET","POST"])
+@user_login_data
+def user_news_release():
+    """用户发布新闻"""
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+
+    categories = 1
+    if request.method == "GET": # get请求，则直接显示页面
+        try:
+            categories = Category.query.filter(Category.name != "最新").all() # 获取所有的分类数据
+        except Exception as e:
+            current_app.logger.error(e)
+        return render_template("news/user_news_release.html",
+                               categories=categories
+                               )
+
+    # 如果不是get请求，则需要接受表单提交的新增新闻内容
+    # 1. 后端接收参数[ 标题、分类id、摘要、内容、上传图片 ]
+    data_dict = request.form
+    data_dict.get("")
+    title = data_dict.get("title") # 新闻标题
+    source = "个人发布" # 新闻来源
+    digest = data_dict.get("digest") # 新闻摘要
+    content = data_dict.get("content") # 新闻内容
+    index_iamge = request.files.get("index_image") # 图片
+    category_id = data_dict.get("category_id")
+
+
+    # 2.校验数据
+    if not all([title,digest,content,index_iamge,category_id]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    # 获取图片的内容，通过read()
+    try:
+        index_iamge = index_iamge.read()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数有误")
+
+    # 保存数据，图片上传到7牛云
+    try:
+        key = file_storage(index_iamge) # 上传到7牛云，获取图片的地址key
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno = RET.THIRDERR,errmsg = "上传图片出错")
+
+    news = News()
+    news.title = title
+    news.source = source
+    news.digest = digest
+    news.content = content
+    news.index_image_url = constants.QINIU_DOMIN_PREFIX + key
+    news.category_id = category_id
+    news.user_id = user.id
+    print(category_id)
+
+    # 1代表带审核状态
+    news.status = 1
+
+    # 响应数据
+    try:
+        db.session.add(news)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(err=RET.DBERR,errmsg="保存数据失败")
+
+    # 返回结果（因为是表单提交数据，所以直接可以后端指定要跳转的页面）
+    return redirect(url_for("user.user_news_list"))
+
+
+
