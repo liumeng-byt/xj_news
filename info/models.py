@@ -120,8 +120,25 @@ class News(BaseModel, db.Model):
             "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
             "index_image_url": self.index_image_url,
             "clicks": self.clicks,
+            # "category":self.category
         }
         return resp_dict
+
+    def to_dict(self):
+        """后台新闻审核详情页视图函数使用,data = {"news": news.to_dict()}"""
+        resp_dict = {
+            "id": self.id,
+            "title": self.title,
+            "source": self.source,
+            "digest": self.digest,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "index_image_url": self.index_image_url,
+            "clicks": self.clicks,
+            "category":self.category,
+            "content":self.content
+        }
+        return resp_dict
+
 
 
 class Comment(BaseModel, db.Model):

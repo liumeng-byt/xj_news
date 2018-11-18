@@ -13,17 +13,20 @@
     <div class="news_list">
     <h3>新闻列表</h3>
     <ul class="article_list">
-        {% for news in data.news_list %}
-            <li><a target="_blank" href="/news/{{ news.id }}">{{ news.title }}</a>
-                {% if news.status == 0 %}
-                    <em class="pass">已通过</em>
-                {% elif news.status == 1 %}
-                    <em class="review">审核中</em>
-                {% else %}
-                    <em class="nopass">未通过</em>
-                    <b>未通过原因：{{ news.reason }}</b>
-            {% endif %}
-            <span>{{ news.create_time }}</span></li>
+         {% for news in data.news_list %}
+                <tr>
+					<td>{{ news.id }}</td>
+					<td class="tleft">{{ news.title }}</td>
+					<td>{{ news.create_time }}</td>
+                    <td>{% if news.status == 0 %}已通过{% elif news.status == 1 %}未审核{% else %}未通过{% endif %}</td>
+
+                    <td>
+                        {% if news.status != 0 %}
+						<a href="/admin/news_review_detail?id={{ news.id }}" class="review">审核</a>
+                        {% endif %}
+                    </td>
+
+				</tr>
         {% endfor %}
     </ul>
     <div id="pagination" class="page"></div>

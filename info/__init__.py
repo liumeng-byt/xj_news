@@ -106,6 +106,12 @@ def create_app(config_name):
                                # data=data
                                )
 
+    # 注册admin蓝图
+    from info.modules.admin import admin_blu
+    app.register_blueprint(admin_blu)
+
+
+
 
     return app
 
