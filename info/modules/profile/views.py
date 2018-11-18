@@ -210,82 +210,59 @@ def pass_info():
         return jsonify(errno=RET.OK, errmsg="保存成功")
 
 
-# 个人中心-用户发布新闻的 列表页面
-@profile_blu.route("/user_news_list",methods=["GET"])
+# 个人中心-新闻列表页面
+@profile_blu.route("/news_list")
 @user_login_data
-def user_news_list():
-    """用户发布新闻列表页面"""
-    # 根据当前用户的id查询对应的发布新闻
-    user = g.user
-    if not user:
-        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
-
-    page = request.args.get("p",1) # 当前页码
-    per_page = request.args.get("per_page",1) # 每页数据量
-
+def news_list():
+    """
+    1.获取页数
+    2.获取user
+    3.到数据库把数据查询出来（查询出来的每个成员都是个对象）
+    4.【分页数据，总页，当前页】
+    5.添加进列表，同时转换成字典
+    6.传给前端
+    :return:
+    """
+    # 获取当前页数1代表当前显示出来的是第一页
+    p = request.args.get("p",1)
     try:
-        page = int(page)
-        per_page = int(per_page)
+        p = int(p)
     except Exception as e:
         current_app.logger.error(e)
-
-    # 总页码初始为1
-    total_page = 1
-    try:
-        pagenation = News.query.filter(News.user_id == user.id).order_by(News.id.desc()).paginate(page,per_page,False)
-
-        # 获取总页码
-        total_page = pagenation.pages
-    except Exception as e:
-        current_app.logger.error(e)
-
-    return render_template("news/user_news_list.html",
-                           total_page=total_page
-                           )
-
-
-
-# 个人中心-ajax提供数据分页
-@profile_blu.route("/user_get_news_list",methods=["GET"])
-@user_login_data
-def user_get_new_list():
-    """ajax提供数据分页"""
+    # 获取用户
     user = g.user
-    if not user:
-        return jsonify(errno=RET.SESSIONERR,errmsg="用户未登录")
-    # 接收参数
-    # 从地址栏上面获取的数据，同意都是字符串，要进行分页，密码和每页数据量必须是int类型
-    page = int(request.args.get("p",1)) # 当前页
-    per_page = int(request.args.get("per_page",constants.OTHER_NEWS_PAGE_MAX_COUNT)) # 每页数据量
 
     # 初始化变量
-    total_page = 1
-    news_li = []
+    news_list = []
     current_page = 1
+    total_page = 1
 
-    # 根据当前用户的user_id查询所发布的新闻信息
+    # 数据库获取数据
     try:
-        pagination = News.query.filter(News.user_id == user.id).order_by(News.id.desc()).paginate(page,per_page,False)
+        # .paginate(当前页p，每页显示多少数据)
+        paginate = News.query.filter(News.user_id == user.id).paginate(p,constants.USER_COLLECTION_MAX_NEWS2)
 
-        # 获取当前页数据列表（是一个列表，成员是每一个数据模型的对象）
-        news_li = pagination.items
+        # 获取所有数据（成员都是对象）
+        news_list = paginate.items
+
         # 获取当前页
-        current_page = pagination.page
-        # 获取总页数
-        total_page = pagination.pages
+        current_page = paginate.page
+
+        # 获取总页
+        total_page = paginate.pages
     except Exception as e:
         current_app.logger.error(e)
 
-    # 因为接下来要返回数据给ajax,所以需要把对象转成字典
-    news_dict_li = []
-    for item in news_li:
-        news_dict_li.append(item.to_basic_dict())
+    news_dict_list = []
+    for news_item in news_list:
+        news_dict_list.append(news_item.to_basic_dict())
+    data = {"news_list":news_dict_list,"total_page":total_page,"current_page": current_page}
 
-    return jsonify(errno =RET.OK,errmsg="操作成功",
-                   news_dict_li=news_dict_li,
-                   current_page=current_page,
-                   total_page=total_page
-                   )
+
+    return render_template("news/user_news_list.html",
+                           data=data
+                           )
+
 
 
 # 个人中心-发布新闻
@@ -312,7 +289,7 @@ def user_news_release():
     data_dict = request.form
     data_dict.get("")
     title = data_dict.get("title") # 新闻标题
-    source = "刘猛" # 新闻来源
+    source = "刘小猛" # 新闻来源
     digest = data_dict.get("digest") # 新闻摘要
     content = data_dict.get("content") # 新闻内容
     index_iamge = request.files.get("index_image") # 图片

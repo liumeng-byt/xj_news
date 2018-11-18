@@ -11,99 +11,33 @@
 </head>
 <body class="inframe_body">
     <div class="news_list">
-        <h3>新闻列表</h3>
-        <ul class="article_list">
-            <li><a href="user_news_release.html">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="pass">已通过</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="pass">已通过</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="review">审核中</em><span>2018-1-17</span></li>
-            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><em class="review">审核中</em><span>2018-1-17</span></li>
-            <li>
-                <a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a>
-                <em class="nopass">未通过</em>
-                <span>2018-1-17</span>
-                <b>未通过原因：因为写的太boring,因为写的太boring,因为写的太boring,因为写的太boring,</b>
-            </li>
-            <li>
-                <a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a>
-                <em class="nopass">未通过</em>
-                <span>2018-1-17</span>
-                <b>未通过原因：因为写的太煽情,因为写的太煽情,因为写的太煽情,因为写的太煽情,</b>
-            </li>
-        </ul>
-        <div id="pagination" class="page"></div>
-        <script>
-            // 调用父页面的方法改变菜单指示
-            // window.parent.fnChangeMenu(2);
-
-            // 页面刚刷新完成就ajax请求第一页数据
-            $(function(){
-                var totalPage = 1; // 默认总页码
-                var page = 1; // 默认当前页
-                user_get_news_list(page);
-                $("#pagination").pagination({
-                    currentPage: page,       // 当前页码
-                    totalPage: {{total_page}},
-                    callback: function(current) { // 参数是当前页码
-                        // 调用ajax获取分页数据
-                        user_get_news_list(current)
-                    }
-                });
+    <h3>新闻列表</h3>
+    <ul class="article_list">
+        {% for news in data.news_list %}
+            <li><a target="_blank" href="/news/{{ news.id }}">{{ news.title }}</a>
+                {% if news.status == 0 %}
+                    <em class="pass">已通过</em>
+                {% elif news.status == 1 %}
+                    <em class="review">审核中</em>
+                {% else %}
+                    <em class="nopass">未通过</em>
+                    <b>未通过原因：{{ news.reason }}</b>
+            {% endif %}
+            <span>{{ news.create_time }}</span></li>
+        {% endfor %}
+    </ul>
+    <div id="pagination" class="page"></div>
+    <script>
+        $(function(){
+            $("#pagination").pagination({
+                currentPage: {{ data.current_page }},
+                totalPage: {{ data.total_page }},
+                callback: function(current) {
+                    window.location.href = '/user/news_list?p=' + current
+                }
             });
-
-            function user_get_news_list(page){
-                // ajax获取分页数据
-
-                // 1. 组织参数
-                params = {
-                    p:page, // 当前页
-                    per_page:2, // 每一页数据量
-                };
-
-                // 2. ajax发送get请求
-                $.ajax({
-                    url:"/user/user_get_news_list",
-                    method:"GET",
-                    data: params,
-                    success:function(resp){
-                        if(resp.errno == 0){
-                            // 3. 获取分页数据，通过循环显示到当前的列表中
-                            // console.log( resp.news_list )
-                            if(resp.news_dict_li){
-                                news_list = resp.news_dict_li;
-                                content_html = "";
-                                for(var i = 0;i<news_list.length;i++){
-                                    news = news_list[i];
-                                    content_html +='<li>'
-                                    content_html +='<a target="__blank" href="/news/'+news.id+'">'+ news.title +'</a>';
-                                    if(news.status==0){
-                                        content_html +='<em class="pass">已通过</em>';
-                                    }else if(news.status==1){
-                                        content_html +='<em class="review">审核中</em>';
-                                    }else{
-                                        content_html +='<em class="nopass">未通过</em>';
-                                    }
-                                    content_html +='<span>'+news.create_time+'</span>';
-                                    if(news.status == -1){
-                                        content_html +='<b>未通过原因：'+ news.reason +'</b>';
-                                    }
-                                    content_html +='</li>';
-                                }
-
-                                $(".article_list").html(content_html)
-                            }
-
-
-                        }else if(resp.errno == 4101){
-                            $('.login_form_con').show();
-                        }else{
-                            alert(resp.errmsg);
-                        }
-                    }
-                })
-            }
-
-        </script>
-
-    </div>
+        });
+    </script>
+</div>
 </body>
 </html>
