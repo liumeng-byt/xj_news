@@ -18,10 +18,10 @@
                 <a href="#" target="_blank" class="author_pic"><img src="{{ user.avatar_url | default('../../static/news/images/dog.png',True) }}" alt="author_pic"></a>
                 <a href="#" target="_blank" class="author_name">{{ user.nick_name }}</a>
                 <div class="author_resume">{{ user.signature }}</div>
-                <div class="writings"><span>总篇数</span><b>{{user.news_count }}</b></div>
-                <div class="follows"><span>粉丝</span><b>{{user.followers_count }}</b></div>
-                <a href="javascript:;" class="focus fr">关注</a>
-                <a href="javascript:;" class="focused fr"><span class="out">已关注</span><span class="over">取消关注</span></a>
+                <div class="writings"><span>总篇数</span><b>{{user.news_list.count() }}</b></div>
+                <div class="follows"><span>粉丝</span><b>{{user.followers.count() }}</b></div>
+                <!--<a href="javascript:;" class="focus fr" data-userid="{{ user.id }}">关注</a>-->
+                <a href="javascript:;" class="focused fr" data-user-id="{{user.id}}"><span class="out">已关注</span><span class="over">取消关注</span></a>
             </li>
             {% endfor %}
             <!--<li class="author_card card_list">-->

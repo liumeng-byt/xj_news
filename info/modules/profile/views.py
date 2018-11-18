@@ -124,12 +124,13 @@ def user_pic_info():
 def user_follow():
     """个人中心显示我的关注"""
     # 获取页数
+
     p = request.args.get("p", 1)  # 当前页数
     try:
         p = int(p)
     except Exception as e:
         current_app.logger.error(e)
-        p = 1
+
 
     # 获取当前用户的信息
     user = g.user
@@ -141,7 +142,7 @@ def user_follow():
     total_page = 1
     try:
         paginate = user.followed.paginate(p, constants.USER_FOLLOWED_MAX_COUNT, False)
-        # 获取当前页数据
+        # 获取所有数据数据（列表）
         follows = paginate.items
 
         # 获取当前页
@@ -149,12 +150,14 @@ def user_follow():
 
         # 获取总页数
         total_page = paginate.pages
+
     except Exception as e:
         current_app.logger.error(e)
 
     user_dict_li = []
     for follow_user in follows:
         user_dict_li.append(follow_user.to_dict())  # to_dict 为转换成字典格式
+    print(user_dict_li)
 
     data = {"user": user_dict_li, "total_page": total_page, "current_page": current_page}
 
@@ -236,7 +239,9 @@ def user_news_list():
     except Exception as e:
         current_app.logger.error(e)
 
-    return render_template("news/user_news_list.html",total_page=total_page)
+    return render_template("news/user_news_list.html",
+                           total_page=total_page
+                           )
 
 
 
@@ -307,7 +312,7 @@ def user_news_release():
     data_dict = request.form
     data_dict.get("")
     title = data_dict.get("title") # 新闻标题
-    source = "个人发布" # 新闻来源
+    source = "刘猛" # 新闻来源
     digest = data_dict.get("digest") # 新闻摘要
     content = data_dict.get("content") # 新闻内容
     index_iamge = request.files.get("index_image") # 图片
@@ -315,7 +320,7 @@ def user_news_release():
 
 
     # 2.校验数据
-    if not all([title,digest,content,index_iamge,category_id]):
+    if not all([source,title,digest,content,index_iamge,category_id]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
 
     # 获取图片的内容，通过read()

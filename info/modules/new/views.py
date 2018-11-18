@@ -272,12 +272,15 @@ def author_fans():
     data_dict = request.json
     author_id = data_dict.get("author_id")
     action = data_dict.get("action")
-
+    print(author_id)
+    print(action)
     # 校验数据
     if not all([author_id,action]):
+
         return jsonify(errno=RET.SESSIONERR,errmsg="参数错误")
 
     if action not in ("follow","cancel_follow"):
+
         return jsonify(errno=RET.SESSIONERR,errmsg="参数错误")
 
     try:

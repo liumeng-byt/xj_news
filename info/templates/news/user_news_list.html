@@ -42,7 +42,7 @@
                 user_get_news_list(page);
                 $("#pagination").pagination({
                     currentPage: page,       // 当前页码
-                    totalPage:{{ total_page }},
+                    totalPage: {{total_page}},
                     callback: function(current) { // 参数是当前页码
                         // 调用ajax获取分页数据
                         user_get_news_list(current)
@@ -68,8 +68,8 @@
                         if(resp.errno == 0){
                             // 3. 获取分页数据，通过循环显示到当前的列表中
                             // console.log( resp.news_list )
-                            if(resp.news_list.length){
-                                news_list = resp.news_list;
+                            if(resp.news_dict_li){
+                                news_list = resp.news_dict_li;
                                 content_html = "";
                                 for(var i = 0;i<news_list.length;i++){
                                     news = news_list[i];

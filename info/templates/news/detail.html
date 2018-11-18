@@ -89,8 +89,8 @@
                 <div class="author_resume"> {{ author.signature | default('无个性，不签名',True)  }}  </div>
                 <div class="writings"><span>总篇数</span><b>{{ news_list_count }}</b></div>
                 <div class="follows"><span>粉丝</span><b>{{ fans_count }}</b></div>
-                 <a href="javascript:;" data-author-id="{{ author.id }}" class="focus fr" style="display:{% if is_follow %}none{% else %}block{% endif %}">关注</a>
-                <a href="javascript:;" data-author-id="{{ author.id }}" class="focused fr" style="display:{% if is_follow %}block{% else %}none{% endif %}"><span class="out">取消关注</span><span class="over">
+                <a href="javascript:;" data-author-id="{{ author.id }}" class="focus fr" style="display:{% if not is_follow %}block{% else %}none{% endif %}">关注</a>
+                <a href="javascript:;" data-author-id="{{ author.id }}" class="focused fr" style="display:{% if is_follow %}block{% else %}none{% endif %}"><span class="out">已关注</span><span class="over">取消关注</span></a>
             </div>
             {% endif %}
             <div class="rank_title">
