@@ -28,7 +28,7 @@ def user_info():
                            )
 
 
-# 修改个人基本信息
+# 个人中心-修改个人基本信息
 @profile_blu.route("/user_base_info", methods=["POST", "GET"])
 @user_login_data
 def user_base_info():
@@ -76,7 +76,7 @@ def user_base_info():
         return jsonify(errno=RET.OK, errmsg="更新成功")
 
 
-# 修改头像
+# 个人中心-修改头像
 @profile_blu.route("/user_pic_info", methods=["POST", "GET"])
 @user_login_data
 def user_pic_info():
@@ -118,7 +118,7 @@ def user_pic_info():
         return jsonify(errno=RET.OK, errmsg="OK", data={"avatar_url": user.avatar_url})
 
 
-# 我的关注
+# 个人中心-我的关注
 @profile_blu.route("/user_follow")
 @user_login_data
 def user_follow():
@@ -164,7 +164,7 @@ def user_follow():
     return render_template("news/user_follow.html", data=data, user=user)
 
 
-# 修改密码
+# 个人中心-修改密码
 @profile_blu.route("/pass_info", methods=["GET", "POST"])
 @user_login_data
 def pass_info():
@@ -210,7 +210,7 @@ def pass_info():
         return jsonify(errno=RET.OK, errmsg="保存成功")
 
 
-# 用户发布新闻的 列表页面
+# 个人中心-用户发布新闻的 列表页面
 @profile_blu.route("/user_news_list",methods=["GET"])
 @user_login_data
 def user_news_list():
@@ -245,7 +245,7 @@ def user_news_list():
 
 
 
-# ajax提供数据分页
+# 个人中心-ajax提供数据分页
 @profile_blu.route("/user_get_news_list",methods=["GET"])
 @user_login_data
 def user_get_new_list():
@@ -288,7 +288,7 @@ def user_get_new_list():
                    )
 
 
-# 发布新闻
+# 个人中心-发布新闻
 @profile_blu.route("/user_news_release",methods=["GET","POST"])
 @user_login_data
 def user_news_release():
@@ -363,4 +363,56 @@ def user_news_release():
     return redirect(url_for("user.user_news_list"))
 
 
+# 个人中心-我的收藏
+@profile_blu.route("/collection")
+@user_login_data
+def user_collection():
+    """
+    1.获取页数
+    2.获取user
+    3.到数据库把数据查询出来（查询出来的每个成员都是个对象）
+    4.【分页数据，总页，当前页】
+    5.添加进列表，同时转换成字典
+    6.传给前端
+    """
+    # 获取当前页数
+    p = request.args.get("p",1)
+    try:
+        p=int(p)
+    except Exception as e:
+        current_app.logger.error(e)
 
+    # 获取用户
+    user = g.user
+
+    #初始化变量
+    # collections = []
+    # current_page = 1
+    # total_page = 1
+
+    try:
+        # 进行分页查询数据
+        paginate = user.collection_news.paginate(p,constants.USER_COLLECTION_MAX_NEWS2,False)
+
+        # 获取所有分页数据【每一个成员都是对象，需要转化成字典】
+        collections = paginate.items
+
+        # 获取当前页
+        current_page = paginate.page
+
+        # 获取总页数
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="获取数据失败")
+
+    #收藏列表
+    collection_dict_li = []
+    for news in collections:
+        collection_dict_li.append(news.to_basic_dict())
+
+    data = {"total_page":total_page,"current_page":current_page,"collections":collection_dict_li}
+
+
+    return render_template("news/user_collection.html",
+                           data=data)

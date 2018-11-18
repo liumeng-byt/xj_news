@@ -17,7 +17,7 @@
 				<li><a href="{{ url_for('user.user_pic_info')}}" target="main_frame">头像设置</a></li>
 				<li><a href="{{ url_for('user.user_follow') }}" target="main_frame">我的关注</a></li>
 				<li><a href="{{ url_for('user.pass_info')}}" target="main_frame">密码修改</a></li>
-				<li><a href="../../static/news/html/user_collection.html" target="main_frame">我的收藏</a></li>
+				<li><a href="{{ url_for('user.user_collection')}}" target="main_frame">我的收藏</a></li>
 				<li><a href="{{ url_for('user.user_news_release')}}" target="main_frame">新闻发布</a></li>
 				<li><a href="{{ url_for('user.user_news_list')}}" target="main_frame">新闻列表</a></li>
 			</ul>
