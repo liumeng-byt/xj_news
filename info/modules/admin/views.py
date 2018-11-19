@@ -10,7 +10,7 @@ from flask import url_for
 
 from info import constants, db
 from info import user_login_data
-from info.models import User, News
+from info.models import User, News, Category
 from info.utils.response_code import RET
 from . import admin_blu
 
@@ -214,7 +214,7 @@ def news_review():
         news_dict_list.append(news.to_basic_dict())
 
     context = {"total_page": total_page, "current_page": current_page, "news_list": news_dict_list}
-    print(context)
+    # print(context)
     return render_template('admin/news_review.html', data=context)
 
 
@@ -284,4 +284,149 @@ def news_review_detail():
     return jsonify(errno=RET.OK, errmsg="操作成功")
 
 
+"""后台新闻板式编辑列表"""
+@admin_blu.route("/news_edit")
+def news_edit():
+    """返回新闻列表"""
+    page = request.args.get("p",1)
+    keywords = request.args.get("keywords","")
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
 
+    # 初始化变量
+    news_list = []
+    current_page = 1
+    total_page = 1
+
+    try:
+        filters = []
+        # 如果有关键词
+        if keywords:
+            # 添加关键词的检索选项
+            filters.append(News.title.contains(keywords))
+
+        # 查询
+        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page,constants.ADMIN_NEWS_PAGE_MAX_COUNT,False)
+
+        news_list = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+
+    news_dict_list = []
+    for news in news_list:
+        news_dict_list.append(news.to_basic_dict())
+
+    context = {"total_page":total_page,"current_page":current_page,"news_list": news_dict_list}
+
+    return render_template("admin/news_edit.html",data = context)
+
+
+
+"""后台新闻板式编辑列表详情页"""
+@admin_blu.route("/news_edit_detail")
+def news_edit_detail():
+    """新闻编辑详情
+    1.拿到id(判断)
+    2.根据id到数据库查询此条新闻（判断）
+    3.查分页
+    4.传到前端
+
+    """
+    # 获取参数
+    news_id = request.args.get("news_id")
+
+    if not news_id:
+        return render_template('admin/news_edit_detail.html', data={"errmsg": "未查询到此新闻"})
+
+    # 查询新闻
+    news = None
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    if not news:
+        return render_template('admin/news_edit_detail.html', data={"errmsg": "未查询到此新闻"})
+
+    # 查询分类数据
+    categories = Category.query.all() # 查所有分类对象
+    categories_li = []
+
+    for category in categories:
+        print(category,category.to_dict())
+        c_dict = category.to_dict() # 把每一个分类都转换成字典格式
+        c_dict["is_selected"] = False # 把分类里的key is_selected 设置为False
+        if category.id == news.category_id:
+            c_dict["is_selected"] = True
+        categories_li.append(c_dict) # 把所有的分类字典添加到列表里
+
+    # 移除”最新“分类
+    categories_li.pop(0)
+    print(news,news.to_dict())
+    data = {"news": news.to_dict(), "categories": categories_li}
+
+    return render_template('admin/news_edit_detail.html', data=data)
+
+
+
+"""分类列表"""
+@admin_blu.route('/news_category')
+def get_news_category():
+    # 获取所有的分类数据
+    categories = Category.query.all()
+    # 定义列表保存分类数据
+    categories_dicts = []
+
+    for category in categories:
+        # 获取字典
+        cate_dict = category.to_dict()
+        # 拼接内容
+        categories_dicts.append(cate_dict)
+
+    categories_dicts.pop(0)
+    # 返回内容
+    data = {"categories": categories_dicts}
+    # print(data)
+    return render_template('admin/news_type.html', data=data)
+
+
+"""修改或者添加分类"""
+@admin_blu.route('/add_category', methods=["POST"])
+def add_category():
+    """修改或者添加分类"""
+
+    category_id = request.json.get("id")
+    category_name = request.json.get("name")
+    if not category_name:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    # 判断是否有分类id
+    if category_id:
+        try:
+            category = Category.query.get(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg="查询数据失败")
+
+        if not category:
+            return jsonify(errno=RET.NODATA, errmsg="未查询到分类信息")
+
+        category.name = category_name
+    else:
+        # 如果没有分类id，则是添加分类
+        category = Category()
+        category.name = category_name
+        db.session.add(category)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg="保存数据失败")
+    return jsonify(errno=RET.OK, errmsg="保存数据成功")

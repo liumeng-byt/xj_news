@@ -39,10 +39,8 @@ $(function(){
     });
 
     $confirm.click(function(){
-
-        var params = {};
-        if(sHandler=='edit')
-        {
+        var params = {}
+        if(sHandler=='edit') {
             var sVal = $input.val();
             if(sVal=='')
             {
@@ -51,11 +49,10 @@ $(function(){
             }
             params = {
                 "id": sId,
-                "name": sVal
+                "name": sVal,
             };
         }
-        else
-        {
+        else {
             var sVal = $input.val();
             if(sVal=='')
             {
@@ -63,11 +60,26 @@ $(function(){
                 return;
             }
             params = {
-                "name": sVal
+                "name": sVal,
             }
         }
 
-        // TODO 发起修改分类请求
-
+        $.ajax({
+            url:"/admin/add_category",
+            method: "post",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // 刷新当前界面
+                    location.reload();
+                }else {
+                    $error.html(resp.errmsg).show();
+                }
+            }
+        })
     })
 });

@@ -180,3 +180,14 @@ class Category(BaseModel, db.Model):
     id = db.Column(db.Integer, primary_key=True)  # 分类编号
     name = db.Column(db.String(64), nullable=False)  # 分类名
     news_list = db.relationship('News', backref='category', lazy='dynamic')
+
+
+    def to_dict(self):
+        """后台新闻板式编辑使用,查询分类数据"""
+        resp_dict = {
+            "id": self.id,
+            "name":self.name,
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        return resp_dict
